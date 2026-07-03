@@ -18,15 +18,16 @@
 #include <vector>
 
 #include "utils.cpp"
+#include "../Grafos/DigraphGenerator.h"
+#include "../Algoritmos/FloydWarshall.h"
+#include "../Algoritmos/BellmanFord.h"
 
-// Include to be tested files here
 
 int main(int argc, char *argv[])
 {
     // Validate and sanitize input
     std::int64_t runs, lower, upper, step;
     validate_input(argc, argv, runs, lower, upper, step);
-
     // Set up clock variables
     std::int64_t n, i, executed_runs;
     std::int64_t total_runs_additive = runs * (((upper - lower) / step) + 1);
@@ -42,6 +43,8 @@ int main(int argc, char *argv[])
     std::random_device rd;
     std::mt19937_64 rng(rd());
     std::uniform_int_distribution<std::int64_t> u_distr; // change depending on app
+    int minW = -10;
+    int maxW = 10;
 
     // File to write time data
     std::ofstream time_data;
@@ -51,19 +54,21 @@ int main(int argc, char *argv[])
     // Begin testing
     std::cerr << "\033[0;36mRunning tests...\033[0m" << std::endl << std::endl;
     executed_runs = 0;
-    for (n = lower; n <= upper; n += step) {
+    for (n = lower; n <= upper; n = n*step) {
         mean_time = 0;
         time_stdev = 0;
-
-        // Test configuration goes here
 
         // Run to compute elapsed time
         for (i = 0; i < runs; i++) {
             // Remember to change total depending on step type
-            display_progress(++executed_runs, total_runs_additive);
+            unsigned current_seed = static_cast<unsigned>(rng());
+            DigraphGenerator gen(static_cast<int>(n), minW, maxW, current_seed);
+            display_progress(++executed_runs, total_runs_multiplicative);
+            auto graph = gen.generateForest();
 
+            BellmanFord bf(graph);
             begin_time = std::chrono::high_resolution_clock::now();
-            // Function to test goes here
+            bf.runAllSources();
             end_time = std::chrono::high_resolution_clock::now();
 
             elapsed_time = end_time - begin_time;
