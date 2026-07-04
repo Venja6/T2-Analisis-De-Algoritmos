@@ -1,11 +1,12 @@
 #include "FloydWarshall.h"
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
 // Constructor: copia el grafo inicial y define el número de vértices
-FloydWarshall::FloydWarshall(const vector<vector<int>>& graph) {
+FloydWarshall::FloydWarshall(const vector<vector<double>>& graph) {
     dist = graph;
     V = graph.size();
 }
@@ -45,4 +46,31 @@ void FloydWarshall::printResult() const {
         }
         cout << endl;
     }
+}
+
+
+void FloydWarshall::makeCSV() const {
+    std::string nombreCSV = "resultado_distancias2.csv";
+    std::ofstream archivoCSV(nombreCSV);
+
+    if (!archivoCSV.is_open()) {
+        std::cerr << "Error: No se pudo crear el archivo CSV." << std::endl;
+        return;
+    }
+
+    archivoCSV << "Nodo_Origen;Nodo_Destino;Peso_Del_Camino\n";
+
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            
+            if (dist[i][j] == INF) {
+                continue; 
+            }
+            
+            int nodo_origen = i + 1;
+            int nodo_destino = j + 1;
+            archivoCSV << nodo_origen << ";" << nodo_destino << ";" << dist[i][j] << "\n";
+        }
+    }
+    archivoCSV.close();
 }
